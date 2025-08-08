@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Statistics - VacciTrack</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  </head>
+  <body class="bg-gray-900 text-white">
+    <video autoplay muted loop playsinline class="fixed top-0 left-0 w-full h-full object-cover z-[-1]">
+      <source src="vid.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Navbar -->
+    <header class="flex justify-between items-center p-6">
+      <div class="flex items-center space-x-3 text-2xl font-bold">
+        <img src="images/logo.png" alt="VacciTrack Logo" class="h-22 w-20 object-contain" />
+        <span>VacciTrack</span>
+      </div>
+      <nav class="space-x-6">
+        <a href="index.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Home</a>
+        <a href="statistics.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Statistics</a>
+        <a href="about.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">About</a>
+        <a href="vaccine.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Vaccine</a>
+      </nav>
+      <div class="flex space-x-4">
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-800 transition-all duration-200">🌙</button>
+        <button onclick="confirmLogout()" class="p-2 px-4 bg-red-600 hover:bg-red-700 rounded text-white transition duration-300">Logout</button>
+      </div>
+    </header>
+
+    <!-- Statistics Section -->
+    <section class="px-6 md:px-20 py-20">
+      <h1 class="text-4xl font-bold text-center mb-10">Vaccination Statistics</h1>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-gray-800 p-6 rounded-lg shadow hover:scale-105 transition-transform duration-300">
+          <h2 class="text-2xl font-bold mb-2">Total Vaccinated</h2>
+          <p class="text-blue-400 text-3xl font-semibold">12,45,678</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow hover:scale-105 transition-transform duration-300">
+          <h2 class="text-2xl font-bold mb-2">Partially Vaccinated</h2>
+          <p class="text-yellow-400 text-3xl font-semibold">4,78,910</p>
+        </div>
+        <div class="bg-gray-800 p-6 rounded-lg shadow hover:scale-105 transition-transform duration-300">
+          <h2 class="text-2xl font-bold mb-2">Unvaccinated</h2>
+          <p class="text-red-400 text-3xl font-semibold">1,23,456</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chart Section -->
+    <section class="px-6 md:px-20 py-20">
+      <h1 class="text-4xl font-bold text-center mb-10">Zone-wise Chennai Vaccination Data</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div onclick="enlargeChart('barChart')" class="bg-gray-800 p-6 rounded-xl shadow-xl cursor-pointer hover:ring-2 hover:ring-blue-400 transition">
+          <canvas id="barChart"></canvas>
+        </div>
+        <div onclick="enlargeChart('pieChart')" class="bg-gray-800 p-6 rounded-xl shadow-xl cursor-pointer hover:ring-2 hover:ring-blue-400 transition">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+<section class="px-6 md:px-20 py-20">
+  <h2 class="text-3xl font-bold text-center mb-6">Vaccination Heatmap of Chennai</h2>
+  <div id="indiaMap" class="w-full h-[500px] rounded-xl shadow-xl"></div>
+</section>
+
+
+    <!-- Disease Cases Section -->
+    <section class="px-6 md:px-20 py-20">
+      <h1 class="text-4xl font-bold text-center mb-10">Disease Cases – Chennai</h1>
+      <div class="flex flex-wrap justify-center gap-6" id="boxContainer"></div>
+    </section>
+
+    <!-- Chart Modal -->
+    <div id="chartModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center z-50">
+      <div class="bg-gray-900 p-6 rounded-lg w-[90%] max-w-4xl relative shadow-2xl border border-gray-700">
+        <button onclick="closeChartModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">✖</button>
+        <div class="w-full h-[400px]">
+          <canvas id="enlargedChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disease Line Chart Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-gray-900 rounded-lg w-[90%] max-w-4xl p-6 relative shadow-2xl border border-gray-700">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">✖</button>
+        <h2 id="modalTitle" class="text-2xl font-bold mb-2">Disease Trends</h2>
+        <p id="riskStatus" class="text-sm text-gray-400 mb-4"></p>
+        <div class="w-full h-[400px]">
+          <canvas id="lineChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const threshold = 40;
+
+      const diseases = [
+        { name: 'COVID-19', today: 20, monthlyCases: [120, 150, 130, 140, 160, 170, 180, 190, 200, 220, 210, 230] },
+        { name: 'Dengue', today: 12, monthlyCases: [30, 45, 40, 60, 90, 120, 140, 160, 180, 210, 240, 280] },
+        { name: 'Malaria', today: 5, monthlyCases: [25, 30, 28, 35, 38, 40, 42, 45, 50, 48, 47, 49] },
+        { name: 'Typhoid', today: 7, monthlyCases: [15, 18, 20, 23, 24, 26, 27, 30, 32, 33, 31, 30] },
+        { name: 'Pneumonia', today: 3, monthlyCases: [10, 15, 12, 14, 13, 12, 11, 13, 14, 15, 16, 17] },
+        { name: 'Tuberculosis', today: 2, monthlyCases: [35, 32, 30, 28, 27, 25, 23, 24, 26, 27, 28, 30] }
+      ];
+
+      const container = document.getElementById('boxContainer');
+
+      diseases.forEach(disease => {
+        const thisMonth = disease.monthlyCases[11];
+        const lastMonth = disease.monthlyCases[10];
+        const change = ((thisMonth - lastMonth) / lastMonth) * 100;
+
+        const box = document.createElement('div');
+        box.className = `
+          bg-gray-800 p-6 rounded-lg w-60 cursor-pointer transform transition duration-300
+          hover:-translate-y-2 hover:shadow-lg hover:ring-2 hover:ring-blue-400
+        `;
+        box.innerHTML = `
+          <h3 class="text-xl font-semibold mb-2">${disease.name}</h3>
+          <p class="text-gray-300 mb-1">+${disease.today} cases today</p>
+          <p class="text-gray-400">+${thisMonth} this month (${Math.abs(change).toFixed(1)}% ${change < 0 ? '↓' : '↑'})</p>
+        `;
+        box.onclick = () => showChart(disease);
+        container.appendChild(box);
+      });
+
+      function showChart(disease) {
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('modalTitle').textContent = `${disease.name} - Monthly Trend`;
+
+        const risk = detectOutbreak(disease.monthlyCases);
+        document.getElementById('riskStatus').textContent = risk
+          ? "⚠ Outbreak risk detected in one or more months!"
+          : "✅ All clear. No outbreak risk.";
+
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        if (window.currentChart) window.currentChart.destroy();
+
+        window.currentChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: months,
+            datasets: [{
+              label: `${disease.name} Cases`,
+              data: disease.monthlyCases,
+              borderColor: '#60a5fa',
+              backgroundColor: 'rgba(96,165,250,0.2)',
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            plugins: {
+              legend: {
+                labels: { color: '#e0e0e0' }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: '#ccc' },
+                grid: { color: '#333' }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: '#ccc' },
+                grid: { color: '#333' }
+              }
+            }
+          }
+        });
+      }
+
+      function detectOutbreak(data) {
+        for (let i = 1; i < data.length; i++) {
+          const diff = ((data[i] - data[i - 1]) / data[i - 1]) * 100;
+          if (diff > threshold) return true;
+        }
+        return false;
+      }
+
+      function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+      }
+
+      function enlargeChart(chartId) {
+        const originalChart = Chart.getChart(chartId);
+        if (!originalChart) return;
+        const modal = document.getElementById("chartModal");
+        const ctx = document.getElementById("enlargedChart").getContext("2d");
+
+        if (window.enlargedChartInstance) window.enlargedChartInstance.destroy();
+
+        const dataClone = JSON.parse(JSON.stringify(originalChart.data));
+        const optionsClone = JSON.parse(JSON.stringify(originalChart.options));
+
+        window.enlargedChartInstance = new Chart(ctx, {
+          type: originalChart.config.type,
+          data: dataClone,
+          options: optionsClone
+        });
+
+        modal.style.display = "flex";
+      }
+
+      function closeChartModal() {
+        document.getElementById("chartModal").style.display = "none";
+        if (window.enlargedChartInstance) window.enlargedChartInstance.destroy();
+      }
+    </script>
+  
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+<script>
+  // Bar Chart
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['T. Nagar', 'Guindy', 'Anna Nagar', 'Kodambakkam', 'Adyar'],
+      datasets: [
+        {
+          label: 'Vaccinated',
+          data: [15000, 18000, 12000, 17000, 14000],
+          backgroundColor: '#3b82f6'
+        },
+        {
+          label: 'Partially Vaccinated',
+          data: [6000, 7000, 5000, 6000, 5500],
+          backgroundColor: '#facc15'
+        },
+        {
+          label: 'Unvaccinated',
+          data: [3000, 4000, 6000, 2000, 5000],
+          backgroundColor: '#ef4444'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: 'white' }},
+        title: {
+          display: true,
+          text: 'Chennai Zone Vaccination',
+          color: 'white',
+          font: { size: 18 }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'white' },
+          grid: { color: '#444' }
+        },
+        y: {
+          ticks: { color: 'white' },
+          grid: { color: '#444' }
+        }
+      }
+    }
+  });
+
+  // Pie Chart
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Vaccinated', 'Partially Vaccinated', 'Unvaccinated'],
+      datasets: [{
+        data: [62000, 29500, 20000],
+        backgroundColor: ['#3b82f6', '#facc15', '#ef4444']
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: 'white' }},
+        title: {
+          display: true,
+          text: 'Overall Vaccination in Chennai',
+          color: 'white'
+        }
+      }
+    }
+  });
+
+  // Leaflet Heatmap
+  const map = L.map("indiaMap").setView([13.0827, 80.2707], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
+
+  const vaccinatedZones = [
+    [13.0827, 80.2707, 0.9],
+    [13.075, 80.26, 0.7],
+    [13.09, 80.28, 0.85]
+  ];
+  const unvaccinatedZones = [
+    [13.07, 80.25, 0.8],
+    [13.06, 80.255, 0.9]
+  ];
+
+  const vaccinatedHeat = L.heatLayer(vaccinatedZones, {
+    radius: 60, blur: 20, maxZoom: 17,
+    gradient: { 0.1: "#0077b6", 0.3: "#023e8a", 0.6: "#011f33", 1.0: "#010f1c" }
+  }).addTo(map);
+
+  const unvaccinatedHeat = L.heatLayer(unvaccinatedZones, {
+    radius: 60, blur: 20, maxZoom: 17,
+    gradient: { 0.1: "#f97316", 0.3: "#c2410c", 0.6: "#7c2d12", 1.0: "#4b1d0f" }
+  }).addTo(map);
+
+  L.control.layers({}, {
+    "Vaccinated Zones": vaccinatedHeat,
+    "Unvaccinated Zones": unvaccinatedHeat,
+  }).addTo(map);
+</script>
+
+</body>
+</html>

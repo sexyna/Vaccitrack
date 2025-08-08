@@ -1,0 +1,107 @@
+<script>
+  if (localStorage.getItem("loggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact - VacciTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white relative">
+
+  <!-- Background Video -->
+   <video autoplay muted loop playsinline class="fixed top-0 left-0 w-full h-full object-cover z-[-1]">
+    <source src="vid.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Navbar -->
+  <header class="flex justify-between items-center p-6">
+    <div class="text-2xl font-bold">VacciTrack</div>
+    <nav class="space-x-6">
+      <a href="index.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Home</a>
+      <a href="statistics.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Statistics</a>
+      <a href="contact.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Contact</a>
+      <a href="about.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">About</a>
+      <a href= "vaccine.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Vaccine</a>
+      
+    </nav>
+    <div class="flex items-center gap-4">
+      <button id="themeToggle" class="p-2 text-xl rounded-full hover:bg-gray-800 transition-all duration-200">🌙</button>
+      <button onclick="confirmLogout()" id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition duration-300 hover:scale-105">Logout</button>
+    </div>
+  </header>
+
+  <!-- Contact Form -->
+  <section class="px-6 md:px-20 py-20">
+    <h1 class="text-4xl font-bold text-center mb-6">Contact Us</h1>
+    <p class="text-gray-300 text-center mb-12 max-w-2xl mx-auto">
+      Reach out to us for questions, feedback, or partnership opportunities. We are here to support you!
+    </p>
+    <form class="max-w-2xl mx-auto space-y-6">
+      <div>
+        <label class="block mb-2 text-sm text-white">Name</label>
+        <input type="text" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" />
+      </div>
+      <div>
+        <label class="block mb-2 text-sm text-white">Email</label>
+        <input type="email" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-white" />
+      </div>
+      <div>
+        <label class="block mb-2 text-sm text-white">Message</label>
+        <textarea rows="4" class="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"></textarea>
+      </div>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded font-semibold text-white transition duration-200">Send Message</button>
+    </form>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-20 py-10 border-t border-gray-700 text-gray-500 text-center">
+    © 2025 VacciTrack
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+
+    function setTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("bg-gray-900", "text-white");
+        localStorage.setItem("theme", "dark");
+        themeToggle.innerText = "☀️";
+      } else {
+        document.body.classList.remove("bg-gray-900", "text-white");
+        localStorage.setItem("theme", "light");
+        themeToggle.innerText = "🌙";
+      }
+    }
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    setTheme(currentTheme);
+
+    themeToggle.addEventListener("click", () => {
+      const newTheme = localStorage.getItem("theme") === "dark" ? "light" : "dark";
+      setTheme(newTheme);
+    });
+
+    function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+        const btn = document.getElementById("logout-btn");
+        btn.innerText = "Logging out...";
+        btn.classList.add("animate-pulse");
+        setTimeout(() => {
+          localStorage.removeItem("loggedIn");
+          window.location.href = "login.html";
+        }, 1500);
+      }
+    }
+  </script>
+</body>
+</html>

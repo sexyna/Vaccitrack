@@ -1,0 +1,204 @@
+<script>
+  if (localStorage.getItem("loggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vaccine Checklist - VacciTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.8s ease-out both;
+    }
+
+    input[type="checkbox"] {
+      appearance: none;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 2px solid #60a5fa;
+      border-radius: 0.25rem;
+      background-color: transparent;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      position: relative;
+    }
+
+    input[type="checkbox"]::before {
+      content: "✔";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      color: white;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.2s ease-in-out;
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: #3b82f6;
+    }
+
+    input[type="checkbox"]:checked::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    input[type="checkbox"]:hover {
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col relative">
+
+  <!-- Background Video -->
+  <video autoplay muted loop playsinline class="fixed top-0 left-0 w-full h-full object-cover z-[-1]">
+    <source src="vid.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- 🔵 Navbar -->
+<header class="flex justify-between items-center p-6">
+    <div class="flex items-center space-x-3 text-2xl font-bold">
+  <img src="images/logo.png" alt="VacciTrack Logo" class="h-22 w-20 object-contain" />
+  <span>VacciTrack</span>
+</div>
+      <nav class="space-x-6">
+        <a href="index.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Home</a>
+        <a href="statistics.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Statistics</a>
+        <a href="about.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">About</a>
+        <a href= "vaccine.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Vaccine</a>
+        
+      </nav>
+      <div class="flex items-center gap-4">
+        <button id="themeToggle" class="p-2 text-xl rounded-full hover:bg-gray-800 transition-all duration-200">🌙</button>
+        <button onclick="confirmLogout()" id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition duration-300 hover:scale-105">Logout</button>
+      </div>
+    </header>
+
+  <!-- Main Section -->
+  <main class="flex-grow px-6 md:px-20 py-16">
+    <div class="max-w-3xl mx-auto bg-gray-800 p-10 rounded-2xl shadow-2xl animate-fade-in transition-transform duration-300 hover:shadow-blue-500/40 hover:scale-105 relative">
+      <img src="images/logo.png" alt="Vaccine Banner" class="w-28 md:w-40 rounded-full mx-auto mb-6 shadow-lg" />
+      <h1 class="text-4xl font-bold mb-6 text-center">🛡️ Vaccine Checklist</h1>
+      <p class="text-gray-300 text-center mb-6 leading-relaxed text-lg">
+        Please confirm if you have been vaccinated for the following diseases:
+      </p>
+
+      <!-- Progress Bar -->
+      <progress id="vaccineProgress" max="6" value="0" class="w-full h-3 mb-6 rounded-lg"></progress>
+
+      <!-- Checklist Form -->
+      <form class="space-y-6 text-lg" id="vaccineForm">
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="tuberculosis" />
+          <span title="Protects against TB bacteria">Tuberculosis</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="typhoid" />
+          <span title="Protects against Salmonella typhi">Typhoid</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="dengue" />
+          <span title="Reduces risk of severe Dengue">Dengue</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="malaria" />
+          <span title="Protects against Plasmodium parasite">Malaria</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="pneumonia" />
+          <span title="Prevents lung infection by bacteria/viruses">Pneumonia</span>
+        </label>
+        <label class="flex items-center gap-4 cursor-pointer hover:text-blue-300 transition-all">
+          <input type="checkbox" name="vaccine" value="covid" />
+          <span title="Protects against COVID-19 variants">COVID-19</span>
+        </label>
+
+        <div class="text-right mt-8">
+          <button type="button" onclick="validateForm()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-all duration-200 shadow-lg hover:scale-105 hover:shadow-blue-500/50">
+            Confirm
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 px-6 md:px-20 py-6 border-t border-gray-700 text-gray-500 text-center">
+    © 2025 VacciTrack
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    function validateForm() {
+      const checkboxes = document.querySelectorAll('input[name="vaccine"]');
+      const total = checkboxes.length;
+      const checked = Array.from(checkboxes).filter(box => box.checked).length;
+
+      if (checked < total) {
+        alert("YOU ARE NOT VACCINATED. PLEASE BOOK YOUR VACCINATION AT https://www.1mg.com/");
+      } else {
+        alert("✅ You are fully vaccinated. Stay healthy!");
+      }
+    }
+
+    // Update progress bar
+    document.querySelectorAll('input[name="vaccine"]').forEach(box => {
+      box.addEventListener('change', () => {
+        const total = document.querySelectorAll('input[name="vaccine"]').length;
+        const checked = document.querySelectorAll('input[name="vaccine"]:checked').length;
+        document.getElementById('vaccineProgress').value = checked;
+      });
+    });
+
+    // Theme Toggle
+    const toggleBtn = document.getElementById("themeToggle");
+    toggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("bg-gray-900");
+      document.body.classList.toggle("bg-white");
+      document.body.classList.toggle("text-white");
+      document.body.classList.toggle("text-black");
+      toggleBtn.textContent = toggleBtn.textContent === "🌙" ? "☀️" : "🌙";
+    });
+  </script>
+
+  <!-- Floating Chat Assistant -->
+  <div id="vaccine-assistant" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <button onclick="toggleBot()" style="padding: 12px 16px; background-color: #0077ff; color: white; border-radius: 50%; border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-size: 20px;">
+      💬
+    </button>
+  </div>
+  <iframe id="chatbot-frame" src="chatbot.html" style="display: none; position: fixed; bottom: 80px; right: 20px; width: 380px; height: 550px; border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 9999;">
+  </iframe>
+  <script>
+    function toggleBot() {
+      const frame = document.getElementById("chatbot-frame");
+      frame.style.display = frame.style.display === "none" ? "block" : "none";
+    }
+  </script>
+</body>
+</html>

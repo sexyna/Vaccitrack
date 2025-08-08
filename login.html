@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - VacciTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass-bg {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+    }
+    .news-ticker {
+      max-height: 250px;
+      overflow: hidden;
+      position: relative;
+    }
+    .news-item {
+      margin-bottom: 0.5rem;
+      animation: fade-in 0.5s ease forwards;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center relative">
+
+  <!-- Background Video -->
+  <video autoplay muted loop playsinline class="absolute top-0 left-0 w-full h-full object-cover z-[-1]">
+    <source src="vid2.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Main Container -->
+  <div class="max-w-5xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+
+    <!-- Login Form -->
+    <div class="glass-bg p-6 rounded-xl shadow-lg">
+      <h1 class="text-2xl font-bold mb-4 text-center">🔐 VacciTrack Login</h1>
+      <form action="/login" method="POST" class="space-y-4">
+        <input type="text" name="username" placeholder="Email or Unique ID" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base">
+        <input type="password" name="password" placeholder="Password or Token" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-base">
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 transition-all duration-200 p-3 rounded-lg text-base font-semibold">Login</button>
+      </form>
+    </div>
+
+    <!-- Live News -->
+    <div class="glass-bg p-6 rounded-xl shadow-lg">
+      <h2 class="text-xl font-bold mb-3">📰 Tamil Nadu Vaccination News</h2>
+      <ul id="newsContainer" class="news-ticker list-disc list-inside text-gray-300 text-sm"></ul>
+    </div>
+
+  </div>
+
+  <!-- Fetch News Script -->
+  <script>
+    const newsContainer = document.getElementById("newsContainer");
+    let newsIndex = 0;
+    let newsData = [
+      { title: "COVID-19 vaccination drive expanded in Tamil Nadu", link: "https://www.thehindu.com" },
+      { title: "Free vaccination camp in Chennai next weekend", link: "https://www.timesofindia.com" },
+      { title: "Over 85% of Tamil Nadu population vaccinated", link: "https://www.ndtv.com" },
+      { title: "TN govt announces booster dose schedule", link: "https://www.thehindu.com" },
+      { title: "Mobile vaccine vans to reach rural areas", link: "https://www.newindianexpress.com" },
+      { title: "Flu and COVID-19 combined vaccination program launched", link: "https://www.thehindu.com" }
+    ];
+
+    function updateNews() {
+      newsContainer.innerHTML = "";
+      // Show 3 bullet points at a time
+      for (let i = 0; i < 3; i++) {
+        const item = newsData[(newsIndex + i) % newsData.length];
+        const li = document.createElement("li");
+        li.className = "news-item";
+        li.innerHTML = `<a href="${item.link}" target="_blank" class="hover:text-blue-400 transition">${item.title}</a>`;
+        newsContainer.appendChild(li);
+      }
+      newsIndex = (newsIndex + 3) % newsData.length;
+    }
+
+    updateNews();
+    setInterval(updateNews, 5000);
+  </script>
+
+  <script>
+  const form = document.querySelector("form");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault(); // prevent default POST
+
+    // Example validation – customize for real checks
+    const username = form.username.value.trim();
+    const password = form.password.value.trim();
+
+    if (username && password) {
+      // Mark user as logged in
+      localStorage.setItem("loggedIn", "true");
+
+      // Redirect to index.html
+      window.location.href = "index.html";
+    } else {
+      alert("Please enter valid credentials.");
+    }
+  });
+</script>
+
+
+</body>
+</html>

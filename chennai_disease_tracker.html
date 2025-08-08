@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chennai Disease Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ffffff;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .box {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      width: 200px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border-left: 6px solid transparent;
+    }
+
+    .box:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.7);
+    }
+
+    .green {
+      border-left-color: #4caf50;
+    }
+
+    .red {
+      border-left-color: #f44336;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .modal-content {
+      background: #1e1e1e;
+      color: #ffffff;
+      padding: 30px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 15px rgba(0,0,0,0.8);
+    }
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #bbb;
+    }
+
+    .close:hover {
+      color: #fff;
+    }
+
+    canvas {
+      max-width: 100%;
+    }
+
+    .outbreak {
+      box-shadow: 0 0 15px 5px #ff4444;
+    }
+
+    .safe {
+      box-shadow: 0 0 10px 3px #4caf50;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Disease Cases – Chennai</h1>
+
+<div class="container" id="boxContainer"></div>
+
+<div class="modal" id="modal">
+  <div class="modal-content" id="modalContent">
+    <span class="close" onclick="closeModal()">×</span>
+    <h2 id="modalTitle">Disease Trends</h2>
+    <p id="riskStatus"></p>
+    <canvas id="lineChart" height="300"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+const diseases = [
+  { name: 'COVID-19', today: 20, monthlyCases: [120, 150, 130, 140, 160, 170, 180, 190, 200, 220, 210, 230] },
+  { name: 'Dengue', today: 12, monthlyCases: [30, 45, 40, 60, 90, 120, 140, 160, 180, 210, 240, 280] },
+  { name: 'Malaria', today: 5, monthlyCases: [25, 30, 28, 35, 38, 40, 42, 45, 50, 48, 47, 49] },
+  { name: 'Typhoid', today: 7, monthlyCases: [15, 18, 20, 23, 24, 26, 27, 30, 32, 33, 31, 30] },
+  { name: 'Pneumonia', today: 3, monthlyCases: [10, 15, 12, 14, 13, 12, 11, 13, 14, 15, 16, 17] },
+  { name: 'Tuberculosis', today: 2, monthlyCases: [35, 32, 30, 28, 27, 25, 23, 24, 26, 27, 28, 30] }
+];
+
+const threshold = 20; // % change for outbreak
+const container = document.getElementById('boxContainer');
+
+let anyOutbreak = diseases.some(disease => detectOutbreak(disease.monthlyCases));
+
+diseases.forEach(disease => {
+  const thisMonth = disease.monthlyCases[11];
+  const lastMonth = disease.monthlyCases[10];
+  const change = ((thisMonth - lastMonth) / lastMonth) * 100;
+  const isOutbreak = change > threshold;
+  
+  const box = document.createElement('div');
+
+  if (!anyOutbreak) {
+    box.className = "box green safe";
+  } 
+  else if (disease.name === 'Tuberculosis') {
+    box.className = "box green safe";
+  }
+  else {
+    box.className = `box ${change < 0 ? 'green' : 'red'} ${isOutbreak ? 'outbreak' : 'safe'}`;
+  }
+
+  box.innerHTML = `
+    <h3>${disease.name}</h3>
+    <p>+${disease.today} cases today</p>
+    <p>+${thisMonth} this month (${Math.abs(change).toFixed(1)}% ${change < 0 ? '↓' : '↑'})</p>
+  `;
+  box.onclick = () => showChart(disease);
+  container.appendChild(box);
+});
+
+function showChart(disease) {
+  document.getElementById('modal').style.display = 'flex';
+  document.getElementById('modalTitle').textContent = `${disease.name} - Monthly Trend`;
+
+  const risk = detectOutbreak(disease.monthlyCases);
+  const riskStatus = document.getElementById('riskStatus');
+  riskStatus.textContent = risk ? "⚠ Outbreak risk detected in one or more months!" : "✅ All clear. No outbreak risk.";
+
+  const ctx = document.getElementById('lineChart').getContext('2d');
+  if (window.currentChart) window.currentChart.destroy();
+
+  window.currentChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: `${disease.name} Cases`,
+        data: disease.monthlyCases,
+        borderColor: '#4da6ff',
+        backgroundColor: 'rgba(77,166,255,0.1)',
+        tension: 0.3,
+        fill: true
+      }]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: { color: '#e0e0e0' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        }
+      }
+    }
+  });
+}
+
+function detectOutbreak(monthlyData) {
+  for (let i = 1; i < monthlyData.length; i++) {
+    const diff = ((monthlyData[i] - monthlyData[i - 1]) / monthlyData[i - 1]) * 100;
+    if (diff > threshold) return true;
+  }
+  return false;
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

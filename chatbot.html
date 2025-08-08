@@ -1,0 +1,89 @@
+<!-- Floating Chatbot Toggle Button -->
+<button onclick="toggleChatbot()" class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50">
+  💬
+</button>
+
+<!-- Chatbot Box -->
+<div id="chatbot-box" class="hidden fixed bottom-24 right-6 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-xl z-50 flex flex-col">
+  <!-- Header -->
+  <div class="flex justify-between items-center bg-gray-800 px-4 py-2 rounded-t-xl">
+    <span class="text-white font-semibold">VacciBot</span>
+    <button onclick="toggleChatbot()" class="text-gray-400 hover:text-white transition">✖</button>
+  </div>
+
+  <!-- Messages -->
+  <div id="chat-body" class="p-4 h-72 overflow-y-auto space-y-2 text-sm flex flex-col">
+    <div class="bg-gray-700 p-2 rounded text-white">👋 Hi! I'm VacciBot. Ask me anything about vaccinations!</div>
+  </div>
+
+  <!-- Input -->
+  <div class="flex border-t border-gray-700">
+    <input id="chat-input" type="text" placeholder="Type here..." class="flex-1 px-3 py-2 bg-gray-800 text-white outline-none rounded-bl-xl" />
+    <button onclick="sendChat()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-br-xl">Send</button>
+  </div>
+  
+  <!-- Quick Buttons -->
+   <div class="flex flex-wrap gap-2 p-2 border-t border-gray-700 justify-center bg-gray-800">
+    <button onclick="handleQuick('Why vaccine')" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">Why vaccine?</button>
+    <button onclick="handleQuick('Schedule')" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">Schedule</button>
+    <button onclick="handleQuick('Help')" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">Help</button>
+    <button onclick="handleQuick('Contact')" class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs">Contact</button>
+    <button onclick="handleQuick('Reset')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs">Reset</button>
+  </div>
+</div>
+
+<!-- Script -->
+<script>
+  function toggleChatbot() {
+    const box = document.getElementById("chatbot-box");
+    box.classList.toggle("hidden");
+  }
+
+  function sendChat() {
+    const input = document.getElementById("chat-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    appendUser(text);
+    appendBot(getBotReply(text.toLowerCase()));
+    input.value = "";
+  }
+
+  function handleQuick(msg) {
+    appendUser(msg);
+    if (msg.toLowerCase() === "reset") {
+      document.getElementById("chat-body").innerHTML = '<div class="bg-gray-700 p-2 rounded text-white">👋 Hi! I\'m VacciBot. Ask me anything about vaccinations!</div>';
+    } else {
+      appendBot(getBotReply(msg.toLowerCase()));
+    }
+  }
+
+  function appendUser(msg) {
+    const bubble = document.createElement("div");
+    bubble.className = "self-end bg-blue-600 text-white p-2 rounded max-w-[75%]";
+    bubble.innerText = msg;
+    document.getElementById("chat-body").appendChild(bubble);
+    scrollChat();
+  }
+
+  function appendBot(msg) {
+    const bubble = document.createElement("div");
+    bubble.className = "self-start bg-gray-700 text-white p-2 rounded max-w-[75%]";
+    bubble.innerHTML = msg;
+    document.getElementById("chat-body").appendChild(bubble);
+    scrollChat();
+  }
+
+  function scrollChat() {
+    const chatBody = document.getElementById("chat-body");
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function getBotReply(input) {
+    if (input.includes("hello") || input.includes("hi")) return "👋 Hello! How can I assist you today?";
+    if (input.includes("vaccine") || input.includes("why")) return "💉 Vaccines help protect you and your community from serious diseases.";
+    if (input.includes("schedule")) return "📅 You can schedule your vaccine via <a href='https://www.1mg.com' target='_blank' class='underline text-blue-400'>1mg.com</a>.";
+    if (input.includes("help") || input.includes("contact")) return "☎️ Contact our support at 1800-123-456 or visit our <a href='https://www.who.int' target='_blank' class='underline text-blue-400'>Help Center</a>.";
+    return "🤖 I'm here to assist with vaccine info. Try 'why vaccine', 'schedule', or 'help'.";
+  }
+</script>
