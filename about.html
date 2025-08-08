@@ -1,0 +1,109 @@
+<script>
+  if (localStorage.getItem("loggedIn") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About - VacciTrack</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white relative">
+    <!-- Background Video -->
+     <video autoplay muted loop playsinline class="fixed top-0 left-0 w-full h-full object-cover z-[-1]">
+      <source src="vid.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+
+  <!-- Navbar -->
+<header class="flex justify-between items-center p-6">
+    <div class="flex items-center space-x-3 text-2xl font-bold">
+  <img src="images/logo.png" alt="VacciTrack Logo" class="h-22 w-20 object-contain" />
+  <span>VacciTrack</span>
+</div>
+      <nav class="space-x-6">
+      <a href="index.html" class="text-white hover:text-blue-400 transition">Home</a>
+      <a href="statistics.html" class="text-white hover:text-blue-400 transition">Statistics</a>
+      <a href="about.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">About</a>
+      <a href= "vaccine.html" class="relative text-white hover:text-blue-400 hover:scale-110 transition-all duration-200">Vaccine</a>
+      
+    </nav>
+    <div class="flex items-center gap-4">
+      <button id="themeToggle" class="p-2 text-xl rounded-full hover:bg-gray-800">🌙</button>
+      <button onclick="confirmLogout()" id="logout-btn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Logout</button>
+    </div>
+  </header>
+
+  <!-- About Section -->
+  <section class="px-6 md:px-20 py-20 max-w-4xl mx-auto">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6 text-center">About VacciTrack</h1>
+    <p class="text-gray-300 text-lg mb-12 leading-relaxed">
+      VacciTrack is a mission-driven initiative aimed at improving public health through technology. By offering real-time access to vaccination data, local camp information, and secure user feedback channels, we empower communities to make informed health decisions.
+    </p>
+    <p class="text-gray-300 text-lg mb-12 leading-relaxed">
+      Our platform is designed for everyone — from concerned parents and healthcare workers to local authorities and volunteers. Whether you're tracking vaccination progress or searching for nearby drives, VacciTrack is here to help.
+    </p>
+    <p class="text-gray-300 text-lg leading-relaxed">
+      We believe that transparent, accessible vaccination data can help build healthier and safer communities. Through collaboration, innovation, and dedication, we are committed to making that a reality.
+    </p>
+  </section>
+
+  <!-- Team Images Section -->
+  <section class="px-6 md:px-20 pb-20 max-w-7xl mx-auto">
+    <h2 class="text-3xl font-semibold text-center mb-10">Our Team</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <img src="C:\Users\ishaa\OneDrive\Documents\VAC4\pic1.jpg" alt="Team Member 1" class="rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+      <img src="C:\Users\ishaa\OneDrive\Documents\VAC4\pic2.jpg" alt="Team Member 2" class="rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+      <img src="C:\Users\ishaa\OneDrive\Documents\VAC4\pic3.jpg" alt="Team Member 3" class="rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-20 py-10 border-t border-gray-700 text-gray-500 text-center">
+    © 2025 VacciTrack
+  </footer>
+
+  <!-- Theme + Logout Scripts -->
+  <script>
+    const themeToggle = document.getElementById("themeToggle");
+
+    function setTheme(mode) {
+      if (mode === "dark") {
+        document.body.classList.add("bg-gray-900", "text-white");
+        localStorage.setItem("theme", "dark");
+        themeToggle.innerText = "☀";
+      } else {
+        document.body.classList.remove("bg-gray-900", "text-white");
+        localStorage.setItem("theme", "light");
+        themeToggle.innerText = "🌙";
+      }
+    }
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    setTheme(currentTheme);
+
+    themeToggle.addEventListener("click", () => {
+      const newTheme = localStorage.getItem("theme") === "dark" ? "light" : "dark";
+      setTheme(newTheme);
+    });
+
+    function confirmLogout() {
+      if (confirm("Are you sure you want to logout?")) {
+        const btn = document.getElementById("logout-btn");
+        btn.innerText = "Logging out...";
+        btn.classList.add("animate-pulse");
+
+        setTimeout(() => {
+          localStorage.removeItem("loggedIn");
+          window.location.href = "login.html";
+        }, 1500);
+      }
+    }
+  </script>
+</body>
+</html>
